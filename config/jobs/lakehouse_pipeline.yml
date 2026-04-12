@@ -1,0 +1,77 @@
+resources:
+  jobs:
+    lakehouse_pipeline:
+      name: lakehouse-pipeline
+      tasks:
+        - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/bronze/bronze_layer
+            source: WORKSPACE
+        - task_key: silver_crm_customer_info
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.crm_customer_info
+            source: WORKSPACE
+        - task_key: silver_crm_products
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.crm_products
+            source: WORKSPACE
+        - task_key: silver_crm_sales
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.crm_sales
+            source: WORKSPACE
+        - task_key: silver_erp_customer_location
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.erp_customer_location
+            source: WORKSPACE
+        - task_key: silver_erp_customers
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.erp_customers
+            source: WORKSPACE
+        - task_key: silver_erp_product_category
+          depends_on:
+            - task_key: bronze_ingestion
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/silver/silver.erp_product_category
+            source: WORKSPACE
+        - task_key: gold_dim_customers
+          depends_on:
+            - task_key: silver_erp_customer_location
+            - task_key: silver_erp_product_category
+            - task_key: silver_erp_customers
+            - task_key: silver_crm_products
+            - task_key: silver_crm_sales
+            - task_key: silver_crm_customer_info
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/gold/gold.dim_customers
+            source: WORKSPACE
+        - task_key: gold_dim_products
+          depends_on:
+            - task_key: silver_erp_customer_location
+            - task_key: silver_erp_product_category
+            - task_key: silver_erp_customers
+            - task_key: silver_crm_products
+            - task_key: silver_crm_sales
+            - task_key: silver_crm_customer_info
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/gold/gold.dim_products
+            source: WORKSPACE
+        - task_key: gold_fact_sales
+          depends_on:
+            - task_key: gold_dim_products
+            - task_key: gold_dim_customers
+          notebook_task:
+            notebook_path: /Workspace/Users/godinho019614@gmail.com/databricks-lakehouse/scripts/gold/gold.fact_sales
+            source: WORKSPACE
+      queue:
+        enabled: true
+      performance_target: PERFORMANCE_OPTIMIZED
